@@ -83,7 +83,6 @@ type DispatchCronDeliveryParams = {
   resolvedDelivery: DeliveryTargetResolution;
   deliveryRequested: boolean;
   skipHeartbeatDelivery: boolean;
-  skipMessagingToolDelivery: boolean;
   deliveryBestEffort: boolean;
   deliveryPayloadHasStructuredContent: boolean;
   deliveryPayloads: ReplyPayload[];
@@ -197,10 +196,10 @@ export async function dispatchCronDelivery(
   let synthesizedText = params.synthesizedText;
   let deliveryPayloads = params.deliveryPayloads;
 
-  // `true` means we confirmed at least one outbound send reached the target.
-  // Keep this strict so timer fallback can safely decide whether to wake main.
-  let delivered = params.skipMessagingToolDelivery;
-  let deliveryAttempted = params.skipMessagingToolDelivery;
+  // `true` means we confirmed cron handled this run as delivered/suppressed.
+  // Keep actual sends strict so cron status is still meaningful.
+  let delivered = false;
+  let deliveryAttempted = false;
   const failDeliveryTarget = (error: string) =>
     params.withRunSession({
       status: "error",
@@ -404,11 +403,7 @@ export async function dispatchCronDelivery(
     }
   };
 
-  if (
-    params.deliveryRequested &&
-    !params.skipHeartbeatDelivery &&
-    !params.skipMessagingToolDelivery
-  ) {
+  if (params.deliveryRequested && !params.skipHeartbeatDelivery) {
     if (!params.resolvedDelivery.ok) {
       if (!params.deliveryBestEffort) {
         return {

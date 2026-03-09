@@ -40,8 +40,9 @@ What it does:
 
 1. Installs repo dependencies with the pinned `pnpm` version from `package.json`.
 2. Runs the normal `pnpm build`.
-3. Creates an `npm pack` tarball under `${TMPDIR:-/tmp}/openclaw-source-builds/` unless `OPENCLAW_PACK_DIR` overrides it.
-4. Installs that tarball into the explicit `openclaw` conda prefix the gateway service already uses.
+3. Runs `pnpm ui:build` so the packaged install includes `dist/control-ui`.
+4. Creates an `npm pack` tarball under `${TMPDIR:-/tmp}/openclaw-source-builds/` unless `OPENCLAW_PACK_DIR` overrides it.
+5. Installs that tarball into the explicit `openclaw` conda prefix the gateway service already uses.
 
 ## Restart
 

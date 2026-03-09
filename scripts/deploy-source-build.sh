@@ -19,6 +19,7 @@ cd "$ROOT_DIR"
 
 npm exec --yes "pnpm@$PNPM_VERSION" install
 npm exec --yes "pnpm@$PNPM_VERSION" -- build
+npm exec --yes "pnpm@$PNPM_VERSION" -- ui:build
 
 tarball="$("$INSTALL_NPM" pack --silent --ignore-scripts "$ROOT_DIR" --pack-destination "$PACK_DIR" | tail -n 1 | tr -d '\r')"
 tarball_path="$PACK_DIR/$tarball"

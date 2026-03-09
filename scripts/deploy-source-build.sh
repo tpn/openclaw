@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE_MANAGER="$(node -p "require('./package.json').packageManager || ''")"
-PACK_DIR="${OPENCLAW_PACK_DIR:-$ROOT_DIR/.artifacts/source-builds}"
+PACK_DIR="${OPENCLAW_PACK_DIR:-${TMPDIR:-/tmp}/openclaw-source-builds}"
 INSTALL_NPM="${OPENCLAW_INSTALL_NPM:-npm}"
 GLOBAL_PREFIX="${OPENCLAW_GLOBAL_PREFIX:-}"
 

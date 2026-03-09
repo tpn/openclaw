@@ -5,6 +5,7 @@ import type { App } from "@slack/bolt";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { expectInboundContextContract } from "../../../../test/helpers/inbound-contract.js";
 import type { OpenClawConfig } from "../../../config/config.js";
+import { loadSessionStore } from "../../../config/sessions.js";
 import { resolveAgentRoute } from "../../../routing/resolve-route.js";
 import { resolveThreadSessionKeys } from "../../../routing/session-key.js";
 import type { ResolvedSlackAccount } from "../../accounts.js";
@@ -131,11 +132,14 @@ describe("slack prepareSlackMessage inbound contract", () => {
     return prepareMessageWith(ctx, createThreadAccount(), createThreadReplyMessage(overrides));
   }
 
-  function createDmScopeMainSlackCtx(): SlackMonitorContext {
+  function createDmScopeMainSlackCtx(params?: { storePath?: string }): SlackMonitorContext {
     const slackCtx = createInboundSlackCtx({
       cfg: {
         channels: { slack: { enabled: true } },
-        session: { dmScope: "main" },
+        session: {
+          dmScope: "main",
+          ...(params?.storePath ? { store: params.storePath } : {}),
+        },
       } as OpenClawConfig,
     });
     // oxlint-disable-next-line typescript/no-explicit-any
@@ -363,6 +367,28 @@ describe("slack prepareSlackMessage inbound contract", () => {
     );
 
     expectMainScopedDmClassification(prepared);
+  });
+
+  it("routes DM replies through the existing DM channel and persists that lastRoute", async () => {
+    const { storePath } = makeTmpStorePath();
+    const prepared = await prepareMessageWith(
+      createDmScopeMainSlackCtx({ storePath }),
+      createSlackAccount(),
+      createMainScopedDmMessage(),
+    );
+
+    expectMainScopedDmClassification(prepared);
+    expect(prepared!.ctxPayload.To).toBe("channel:D0ACP6B1T8V");
+    expect(prepared!.ctxPayload.OriginatingTo).toBe("channel:D0ACP6B1T8V");
+    expect(prepared!.replyTarget).toBe("channel:D0ACP6B1T8V");
+
+    const store = loadSessionStore(storePath, { skipCache: true });
+    expect(store[prepared!.route.mainSessionKey]).toEqual(
+      expect.objectContaining({
+        lastChannel: "slack",
+        lastTo: "channel:D0ACP6B1T8V",
+      }),
+    );
   });
 
   it("sets MessageThreadId for top-level messages when replyToMode=all", async () => {

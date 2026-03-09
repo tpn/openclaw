@@ -638,7 +638,7 @@ export async function prepareSlackMessage(params: {
     });
   }
 
-  const slackTo = isDirectMessage ? `user:${message.user}` : `channel:${message.channel}`;
+  const slackTo = `channel:${message.channel}`;
 
   const { untrustedChannelMetadata, groupSystemPrompt } = resolveSlackRoomContextHints({
     isRoomish,
@@ -745,7 +745,7 @@ export async function prepareSlackMessage(params: {
       ? {
           sessionKey: route.mainSessionKey,
           channel: "slack",
-          to: `user:${message.user}`,
+          to: `channel:${message.channel}`,
           accountId: route.accountId,
           threadId: threadContext.messageThreadId,
           mainDmOwnerPin:
@@ -774,7 +774,7 @@ export async function prepareSlackMessage(params: {
     },
   });
 
-  const replyTarget = ctxPayload.To ?? undefined;
+  const replyTarget = isDirectMessage ? `channel:${message.channel}` : (ctxPayload.To ?? undefined);
   if (!replyTarget) {
     return null;
   }

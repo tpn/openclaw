@@ -34,7 +34,12 @@ if [[ -n "$GLOBAL_PREFIX" ]]; then
   install_cmd+=(--prefix "$GLOBAL_PREFIX")
 fi
 install_cmd+=("$tarball_path")
-"${install_cmd[@]}"
+GIT_CONFIG_COUNT=2 \
+GIT_CONFIG_KEY_0=url.https://github.com/.insteadof \
+GIT_CONFIG_VALUE_0=ssh://git@github.com/ \
+GIT_CONFIG_KEY_1=url.https://github.com/.insteadof \
+GIT_CONFIG_VALUE_1=git@github.com: \
+  "${install_cmd[@]}"
 
 echo "Installed $tarball_path"
 if [[ -n "$GLOBAL_PREFIX" ]]; then

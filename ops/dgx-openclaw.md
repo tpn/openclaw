@@ -43,13 +43,18 @@ What it does:
 3. Runs `pnpm ui:build` so the packaged install includes `dist/control-ui`.
 4. Creates an `npm pack` tarball under `${TMPDIR:-/tmp}/openclaw-source-builds/` unless `OPENCLAW_PACK_DIR` overrides it.
 5. Installs that tarball into the explicit `openclaw` conda prefix the gateway service already uses.
+   - The install step rewrites GitHub SSH dependency URLs to HTTPS for that command so hosts without GitHub SSH keys can still install public git-backed npm dependencies cleanly.
 
-## Restart
+## Reinstall the service cleanly
 
-After a successful install:
+After a successful package install, reinstall the user service via the `openclaw`
+env's `node` so the unit keeps pointing at that env even if another `node` is
+earlier on `PATH`:
 
 ```bash
-systemctl --user restart openclaw-gateway.service
+/home/trent/mambaforge/envs/openclaw/bin/node \
+  /home/trent/mambaforge/envs/openclaw/lib/node_modules/openclaw/openclaw.mjs \
+  gateway install --force
 ```
 
 ## Verify

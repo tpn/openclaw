@@ -4,17 +4,17 @@
 
 - Repo checkout: `/home/trent/src/openclaw`
 - Current remotes on this host:
-  - `origin` = `gh:openclaw/openclaw`
-  - `tpn` = `gh:tpn/openclaw`
+  - `origin` = `gh:tpn/openclaw`
+  - `upstream` = `gh:openclaw/openclaw`
 - Running gateway service:
   - unit: `~/.config/systemd/user/openclaw-gateway.service`
   - current ExecStart: `/home/trent/mambaforge/envs/openclaw/bin/node /home/trent/mambaforge/envs/openclaw/lib/node_modules/openclaw/dist/index.js gateway --port 18789`
+- Slack DM owner allowlist on this host should use Trent's stable Slack user ID:
+  - `channels.slack.allowFrom: ["U035G8BHXNU"]`
 
 Do not patch hashed `dist/*.js` files in place on live hosts. Make changes in source, rebuild, and redeploy.
 
 ## Sync workflow
-
-Current host layout keeps upstream on `origin` and the fork on `tpn`. For future hosts, prefer the more standard layout:
 
 - `origin` = `gh:tpn/openclaw`
 - `upstream` = `gh:openclaw/openclaw`

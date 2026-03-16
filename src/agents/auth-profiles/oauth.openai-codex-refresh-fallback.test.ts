@@ -17,8 +17,10 @@ const { getOAuthApiKeyMock } = vi.hoisted(() => ({
   }),
 }));
 
-vi.mock("@mariozechner/pi-ai", async () => {
-  const actual = await vi.importActual<typeof import("@mariozechner/pi-ai")>("@mariozechner/pi-ai");
+vi.mock("@mariozechner/pi-ai/oauth", async () => {
+  const actual = await vi.importActual<typeof import("@mariozechner/pi-ai/oauth")>(
+    "@mariozechner/pi-ai/oauth",
+  );
   return {
     ...actual,
     getOAuthApiKey: getOAuthApiKeyMock,
@@ -96,6 +98,32 @@ describe("resolveApiKeyForProfile openai-codex refresh fallback", () => {
       email: undefined,
     });
     expect(getOAuthApiKeyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back to cached access token when openai-codex refresh token was already reused", async () => {
+    const profileId = "openai-codex:default";
+    saveAuthProfileStore(
+      createExpiredOauthStore({
+        profileId,
+        provider: "openai-codex",
+      }),
+      agentDir,
+    );
+    getOAuthApiKeyMock.mockImplementationOnce(async () => {
+      throw new Error("refresh_token_reused");
+    });
+
+    const result = await resolveApiKeyForProfile({
+      store: ensureAuthProfileStore(agentDir),
+      profileId,
+      agentDir,
+    });
+
+    expect(result).toEqual({
+      apiKey: "cached-access-token", // pragma: allowlist secret
+      provider: "openai-codex",
+      email: undefined,
+    });
   });
 
   it("keeps throwing for non-codex providers on the same refresh error", async () => {

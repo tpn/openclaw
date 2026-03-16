@@ -97,7 +97,11 @@ function shouldUseOpenaiCodexRefreshFallback(params: {
     return false;
   }
   const message = extractErrorMessage(params.error);
-  if (!/extract\s+accountid\s+from\s+token/i.test(message)) {
+  if (
+    !/extract\s+accountid\s+from\s+token/i.test(message) &&
+    !/refresh[_\s-]?token[_\s-]?reused/i.test(message) &&
+    !/refresh token has already been used/i.test(message)
+  ) {
     return false;
   }
   return (
